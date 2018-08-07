@@ -1,7 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <EEPROM.h>
-#include "config.h"
+//#include "config.h"
+#include "config_205.h"
 
 const char* ssid = "SEIL";
 const char* password = "deadlock123";
@@ -35,9 +36,9 @@ void setupWifi()
   Serial.print("Connected to WiFi with IP address ");
   Serial.println(WiFi.localIP());
 }
-
-void actuation()
-{
+/*
+  void actuation()
+  {
   Serial.println("Switching appliance");
   for (int i = 0; i < 8; i++)
   {
@@ -49,8 +50,8 @@ void actuation()
     EEPROM.commit();
   }
   Serial.println("\n");
-}
-
+  }
+*/
 void callback(char* topic, byte* payload, unsigned int length)
 {
   /*
@@ -101,57 +102,64 @@ void callback(char* topic, byte* payload, unsigned int length)
   all_appliances = tolower((char)payload[1]);
   command = (int)payload[2] - 48;
 
+  int index = 0;
 
+  char temp[10];
+  //  appliance[index].locations.toCharArray(temp, 10);
+    while (strcmp(appliance_location, appliances[index].locations));
+//  Serial.println(appliances[index].locations);
 
-  if (appliance_location != NULL)   // Controlling single appliance
-  {
-    for (int i = 0; i < 8; i++)
+  /*
+    if (appliance_location != NULL)   // Controlling single appliance
     {
-      if (appliance == config205.appliances[i])
+      for (int i = 0; i < 8; i++)
       {
-        Serial.print("Configuring appliance ");
-        Serial.println(config205.appliances[i]);
-        appliance_index = i;
-        if (action == 's' && command == 1)
-          config205.appliance_status[i] = 1;
-        else if (action == 's' && command == 0)
-          config205.appliance_status[i] = 0;
-        else if (action == 'r')
-          Serial.println("In regulation mode");
+        if (appliance == config205.appliances[i])
+        {
+          Serial.print("Configuring appliance ");
+          Serial.println(config205.appliances[i]);
+          appliance_index = i;
+          if (action == 's' && command == 1)
+            config205.appliance_status[i] = 1;
+          else if (action == 's' && command == 0)
+            config205.appliance_status[i] = 0;
+          else if (action == 'r')
+            Serial.println("In regulation mode");
+          else
+            Serial.println("Enter a Valid Mode");
+        }
+      }
+    }
+    else
+    {
+      if (all_appliances == 'f')
+      {
+        Serial.println("Burst Mode Bitches, FANS");
+        if (command == 1)
+        {
+          for (int i = 4; i < 4 + config205.total_fans; i++) config205.appliance_status[i] = 1;
+        }
         else
-          Serial.println("Enter a Valid Mode");
+        {
+          for (int i = 4; i < 4 + config205.total_fans; i++) config205.appliance_status[i] = 0;
+        }
+      }
+      else if (all_appliances == 'l')
+      {
+        Serial.println("Burst Mode Bitches, LILGHTS");
+        if (command == 1)
+        {
+          for (int i = 0; i < config205.total_lights; i++) config205.appliance_status[i] = 1;
+        }
+        else
+        {
+          for (int i = 0; i < config205.total_lights; i++) config205.appliance_status[i] = 0;
+        }
       }
     }
-  }
-  else
-  {
-    if (all_appliances == 'f')
-    {
-      Serial.println("Burst Mode Bitches, FANS");
-      if (command == 1)
-      {
-        for (int i = 4; i < 4 + config205.total_fans; i++) config205.appliance_status[i] = 1;
-      }
-      else
-      {
-        for (int i = 4; i < 4 + config205.total_fans; i++) config205.appliance_status[i] = 0;
-      }
-    }
-    else if (all_appliances == 'l')
-    {
-      Serial.println("Burst Mode Bitches, LILGHTS");
-      if (command == 1)
-      {
-        for (int i = 0; i < config205.total_lights; i++) config205.appliance_status[i] = 1;
-      }
-      else
-      {
-        for (int i = 0; i < config205.total_lights; i++) config205.appliance_status[i] = 0;
-      }
-    }
-  }
 
-  actuation();
+    actuation();
+  */
 }
 
 void reconnect()
@@ -181,17 +189,18 @@ void setup()
   Serial.begin(115200);
   Serial.println("____Indevidual Appliance Control____");
 
-  for (int i = 0; i < 8; i++) pinMode(config205.appliance_pins[i], OUTPUT);
-  delay(100);
+  /*
+    for (int i = 0; i < 8; i++) pinMode(config205.appliance_pins[i], OUTPUT);
+    delay(100);
 
-  for (int i = 0; i < 8; i++)
-  {
-    if (EEPROM.read(config205.eeprom_address[i]) == 1)
-      digitalWrite(config205.appliance_pins[i], LOW);
-    if (EEPROM.read(config205.eeprom_address[i]) == 0)
-      digitalWrite(config205.appliance_pins[i], HIGH);
-  }
-
+    for (int i = 0; i < 8; i++)
+    {
+      if (EEPROM.read(config205.eeprom_address[i]) == 1)
+        digitalWrite(config205.appliance_pins[i], LOW);
+      if (EEPROM.read(config205.eeprom_address[i]) == 0)
+        digitalWrite(config205.appliance_pins[i], HIGH);
+    }
+  */
   setupWifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
